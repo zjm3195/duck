@@ -1,33 +1,17 @@
-# 编译 typescript
-FROM public-cn-beijing.cr.volces.com/public/base:node-16-alpine as builder
+# 用火山引擎（抖音官方）国内镜像源，100%能拉取
+FROM public-cn-beijing.cr.volces.com/public/base:node-18-alpine
 
-WORKDIR /opt/application/
+# 设置工作目录
+WORKDIR /app
 
-COPY .  .
+# 复制项目文件到容器内
+COPY . .
 
-USER root
-
+# 用国内npm源安装依赖，避免超时
 RUN npm install --registry=https://registry.npmmirror.com
 
-RUN npm run build
+# 暴露服务端口（和你的server.js监听端口一致，默认是8080）
+EXPOSE 8080
 
-# 生产环境镜像，不安装 devDependencies， 减少部署镜像大小
-FROM node:16-alpine
-
-WORKDIR /opt/application/
-
-COPY --from=builder /opt/application/dist ./dist
-
-COPY package.json ./
-
-COPY run.sh ./
-
-USER root
-
-RUN npm install --production --registry=https://registry.npmmirror.com
-
-RUN chmod -R 777 /opt/application/run.sh
-
-EXPOSE 8000
-
-CMD /opt/application/run.sh
+# 启动服务，直接运行你的入口文件
+CMD ["node", "server.js"]
