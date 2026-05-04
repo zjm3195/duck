@@ -1,1 +1,2 @@
-node /app/server.js
+#!/bin/bash
+node server.js
